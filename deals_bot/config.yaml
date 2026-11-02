@@ -1,0 +1,40 @@
+name: Deals Bot
+version: "0.1.0"
+slug: deals_bot
+description: מפרסם מוצרי עליאקספרס עם קישורי שותפים בטלגרם, בוואטסאפ ובדף פייסבוק
+url: https://github.com/orenasher/ha-deals-bot
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: application
+boot: auto
+options:
+  telegram_bot_token: ""
+  telegram_admin_ids: []
+  telegram_channel: ""
+  anthropic_api_key: ""
+  anthropic_model: claude-sonnet-5-5
+  disclosure: "🔗 קישור שותפים: רכישה דרכו מזכה אותי בעמלה קטנה, בלי עלות נוספת לכם."
+  whatsapp_enabled: true
+  whatsapp_delay_seconds: 5
+  facebook_page_id: ""
+  facebook_page_token: ""
+  aliexpress_app_key: ""
+  aliexpress_app_secret: ""
+  aliexpress_tracking_id: ""
+schema:
+  telegram_bot_token: password
+  telegram_admin_ids:
+    - int
+  telegram_channel: str?
+  anthropic_api_key: password?
+  anthropic_model: str
+  disclosure: str?
+  whatsapp_enabled: bool
+  whatsapp_delay_seconds: int(1,60)
+  facebook_page_id: str?
+  facebook_page_token: password?
+  aliexpress_app_key: str?
+  aliexpress_app_secret: password?
+  aliexpress_tracking_id: str?

@@ -1,0 +1,40 @@
+configuration:
+  telegram_bot_token:
+    name: טוקן בוט טלגרם
+    description: הטוקן ש-BotFather נתן לבוט.
+  telegram_admin_ids:
+    name: ה-ID שלך בטלגרם
+    description: שלח הודעה כלשהי לבוט והוא יגיד לך מה ה-ID שלך.
+  telegram_channel:
+    name: ערוץ טלגרם
+    description: הערוץ לפרסום, למשל @mychannel. הבוט חייב להיות מנהל בו.
+  anthropic_api_key:
+    name: מפתח Anthropic API
+    description: לכתיבת הפוסטים (console.anthropic.com).
+  anthropic_model:
+    name: מודל AI
+    description: המודל שכותב את הפוסטים.
+  disclosure:
+    name: הצהרת קישור שותפים
+    description: מתווספת בסוף כל פוסט.
+  whatsapp_enabled:
+    name: וואטסאפ
+    description: פרסום בקבוצות וואטסאפ דרך מספר נפרד שמקושר לבוט.
+  whatsapp_delay_seconds:
+    name: השהיה בין קבוצות וואטסאפ (שניות)
+    description: הפסקה בין קבוצה לקבוצה, כדי שהפרסום ייראה פחות אוטומטי.
+  facebook_page_id:
+    name: מזהה דף פייסבוק
+    description: המספר המזהה של הדף העסקי.
+  facebook_page_token:
+    name: טוקן דף פייסבוק
+    description: טוקן של הדף עם הרשאת pages_manage_posts.
+  aliexpress_app_key:
+    name: AliExpress App Key
+    description: מפלטפורמת המפתחים של עליאקספרס, אחרי אישור ה-API.
+  aliexpress_app_secret:
+    name: AliExpress App Secret
+    description: מפלטפורמת המפתחים של עליאקספרס.
+  aliexpress_tracking_id:
+    name: AliExpress Tracking ID
+    description: מ-Portals, בלשונית Account ← Tracking ID.

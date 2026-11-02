@@ -1,0 +1,40 @@
+configuration:
+  telegram_bot_token:
+    name: Telegram bot token
+    description: The token BotFather gave you for the bot.
+  telegram_admin_ids:
+    name: Telegram admin IDs
+    description: Your Telegram user ID. Send any message to the bot to get it.
+  telegram_channel:
+    name: Telegram channel
+    description: The channel to post in, e.g. @mychannel. The bot must be an admin there.
+  anthropic_api_key:
+    name: Anthropic API key
+    description: Used to write the posts (console.anthropic.com).
+  anthropic_model:
+    name: AI model
+    description: Claude model that writes the posts.
+  disclosure:
+    name: Affiliate disclosure
+    description: Added at the end of every post.
+  whatsapp_enabled:
+    name: WhatsApp
+    description: Post to WhatsApp groups through a separate, linked number.
+  whatsapp_delay_seconds:
+    name: Delay between WhatsApp groups (seconds)
+    description: Pause between groups so the posting looks less automated.
+  facebook_page_id:
+    name: Facebook Page ID
+    description: The numeric ID of your Facebook Page.
+  facebook_page_token:
+    name: Facebook Page access token
+    description: A Page token with pages_manage_posts permission.
+  aliexpress_app_key:
+    name: AliExpress App Key
+    description: From the AliExpress Open Platform, after the Affiliate API is approved.
+  aliexpress_app_secret:
+    name: AliExpress App Secret
+    description: From the AliExpress Open Platform.
+  aliexpress_tracking_id:
+    name: AliExpress Tracking ID
+    description: From Portals, Account, Tracking ID.
