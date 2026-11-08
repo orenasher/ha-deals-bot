@@ -136,8 +136,16 @@ export class WhatsApp extends EventEmitter {
     if (!this.sock || this.status !== "open") throw new Error("WhatsApp is not connected");
     const all = await this.sock.groupFetchAllParticipating();
     return Object.values(all || {})
-      .map((g) => ({ id: g.id, subject: g.subject || g.id, size: (g.participants || []).length, announce: !!g.announce }))
-      .sort((a, b) => b.size - a.size);
+      // The community itself can't receive messages; its announcements group and sub-groups can.
+      .filter((g) => !g.isCommunity)
+      .map((g) => ({
+        id: g.id,
+        subject: g.subject || g.id,
+        size: (g.participants || []).length,
+        announce: !!g.announce,
+        communityAnnounce: !!g.isCommunityAnnounce,
+      }))
+      .sort((a, b) => b.communityAnnounce - a.communityAnnounce || b.size - a.size);
   }
 
   async sendImage(jid, image, caption) {

@@ -1,6 +1,6 @@
 {
   "name": "ha-deals-bot",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Home Assistant add-on: posts AliExpress affiliate deals to Telegram, WhatsApp and a Facebook Page",
   "type": "module",

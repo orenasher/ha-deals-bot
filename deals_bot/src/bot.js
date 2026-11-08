@@ -470,7 +470,7 @@ export class Bot {
       return this.tg.sendMessage(chat, `❌ לא הצלחתי לקרוא את הקבוצות: ${err.message}`);
     }
     if (!this.groupCache.length) return this.tg.sendMessage(chat, "המספר הזה לא חבר באף קבוצה. הוסף אותו לקבוצות (רצוי כמנהל) ונסה שוב.");
-    return this.tg.sendMessage(chat, "סמן לאילו קבוצות לפרסם (לחיצה מסמנת או מבטלת):\n\nבקבוצה שרק מנהלים יכולים לכתוב בה, המספר צריך להיות מנהל.", {
+    return this.tg.sendMessage(chat, "סמן לאילו קבוצות לפרסם (לחיצה מסמנת או מבטלת):\n\n📢 = קבוצת ההכרזות של קהילה: מגיעה לכל חברי הקהילה, והמספר חייב להיות מנהל בקהילה.\n🔒 = רק מנהלים כותבים, והמספר צריך להיות מנהל.", {
       reply_markup: { inline_keyboard: this.groupButtons() },
     });
   }
@@ -478,7 +478,7 @@ export class Bot {
   groupButtons() {
     const chosen = new Set(this.state.get("whatsapp_groups", []).map((g) => g.id));
     return this.groupCache.slice(0, 40).map((g) => [
-      { text: `${chosen.has(g.id) ? "✅" : "⬜"} ${g.subject} (${g.size})${g.announce ? " 🔒" : ""}`.slice(0, 60), callback_data: `wg:${g.id}`.slice(0, 64) },
+      { text: `${chosen.has(g.id) ? "✅" : "⬜"} ${g.communityAnnounce ? "📢 " : ""}${g.subject} (${g.size})${g.announce && !g.communityAnnounce ? " 🔒" : ""}`.slice(0, 60), callback_data: `wg:${g.id}`.slice(0, 64) },
     ]);
   }
 
