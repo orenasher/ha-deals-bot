@@ -9,6 +9,13 @@ import { LINK_PLACEHOLDER } from "./ai.js";
 const CAPTION_LIMIT = 1024;
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 const PENDING_TTL_MS = 15 * 60 * 1000;
+const OPEN_DRAFT_MS = 3 * 60 * 60 * 1000;
+
+/** A reply this long (compared with the draft) is a rewritten post, not an instruction. */
+function looksLikeFullPost(text, draft) {
+  const postLen = (draft.post || "").length;
+  return text.length >= Math.max(200, postLen * 0.5);
+}
 const MAX_QR_SENDS = 6;
 
 const HELP = `שלום! ככה עובדים איתי:
@@ -18,7 +25,8 @@ const HELP = `שלום! ככה עובדים איתי:
 3. אפשר להוסיף כמה מילים משלך, למשל "עובד עם Matter, מחיר 45 ש״ח".
 
 אני אכתוב פוסט ואשלח לך תצוגה מקדימה עם כפתורים לפרסום.
-לתיקון ידני: ענה (Reply) על התצוגה המקדימה עם הטקסט המתוקן.
+לשינוי: כתוב לי מה לתקן, למשל "תוסיף שזה שקע ישראלי ועובד ב-Wi-Fi", ואכתוב גרסה חדשה.
+לטקסט משלך: ענה (Reply) על התצוגה המקדימה עם הפוסט המלא המתוקן.
 
 פקודות:
 /status – מצב החיבורים
@@ -94,10 +102,16 @@ export class Bot {
     const text = (m.text || m.caption || "").trim();
     if (text.startsWith("/")) return this.onCommand(m, text);
 
-    // A reply to a preview with text and no link = the corrected post.
+    // Text with no link and no photo, about a draft:
+    // - a reply with a full post = the corrected post, used as is;
+    // - anything shorter (as a reply, or a plain message right after a preview) = an instruction for the AI.
     const replyTo = m.reply_to_message && this.findDraftByMessage(m.chat.id, m.reply_to_message.message_id);
-    if (replyTo && text && !findAliExpressLinks(text).length && !m.photo) {
-      return this.applyManualEdit(m.chat.id, replyTo, text);
+    if (text && !findAliExpressLinks(text).length && !m.photo && !m.document) {
+      const draft = replyTo || (!this.hasFreshPending(m.chat.id) && this.latestOpenDraft(m.chat.id));
+      if (draft) {
+        if (replyTo && looksLikeFullPost(text, draft)) return this.applyManualEdit(m.chat.id, draft, text);
+        return this.applyInstruction(m.chat.id, draft, text);
+      }
     }
 
     return this.onContent(m, text);
@@ -245,7 +259,7 @@ export class Bot {
     if (msg.photo && msg.photo.length) draft.photoFileId = msg.photo[msg.photo.length - 1].file_id;
     draft.previewMessageIds = [...(draft.previewMessageIds || []), msg.message_id];
     const notes = [...(draft.warnings || []), ...(draft.aiWarnings || [])];
-    const lines = ["👆 תצוגה מקדימה. לתיקון ידני: ענה (Reply) על ההודעה עם הטקסט המתוקן."];
+    const lines = ["👆 תצוגה מקדימה. לשינוי: כתוב לי מה לתקן (למשל \"תוסיף שזה שקע ישראלי\"). לטקסט משלך: ענה (Reply) על הפוסט עם הטקסט המלא."];
     if (notes.length) lines.push("", "⚠️ לבדוק לפני פרסום:", ...notes.map((n) => `• ${n}`));
     await this.tg.sendMessage(draft.chat, lines.join("\n"));
   }
@@ -274,6 +288,7 @@ export class Bot {
   saveDraft(draft) {
     const now = Date.now();
     for (const [k, d] of this.drafts) if (now - d.createdAt > DRAFT_TTL_MS) this.drafts.delete(k);
+    draft.updatedAt = now;
     this.drafts.set(draft.id, draft);
   }
 
@@ -282,6 +297,29 @@ export class Bot {
       if (d.chat === chat && (d.previewMessageIds || []).includes(messageId)) return d;
     }
     return null;
+  }
+
+  hasFreshPending(chat) {
+    const p = this.pending.get(chat);
+    return !!(p && Date.now() - p.at < PENDING_TTL_MS);
+  }
+
+  /** The newest unpublished draft in this chat, if it was touched in the last few hours. */
+  latestOpenDraft(chat) {
+    let best = null;
+    for (const d of this.drafts.values()) {
+      if (d.chat !== chat || d.published) continue;
+      if (Date.now() - (d.updatedAt || d.createdAt) > OPEN_DRAFT_MS) continue;
+      if (!best || (d.updatedAt || d.createdAt) > (best.updatedAt || best.createdAt)) best = d;
+    }
+    return best;
+  }
+
+  async applyInstruction(chat, draft, text) {
+    if (draft.published) return this.tg.sendMessage(chat, "הפוסט הזה כבר פורסם.");
+    await this.tg.call("sendChatAction", { chat_id: chat, action: "typing" }).catch(() => {});
+    draft.notes = [draft.notes, text].filter(Boolean).join("\n");
+    return this.writeAndPreview(draft, { instruction: text });
   }
 
   async applyManualEdit(chat, draft, text) {
